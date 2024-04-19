@@ -3,7 +3,7 @@ transformers
 fastapi
 sentencepiece
 flask
-pytorch
+torch
 openpyxl
 numpy
 pandas
