@@ -1,25 +1,11 @@
-# Useful for handling form data and HTTP Exceptions
 from fastapi import FastAPI, Form, HTTPException
-# These are used for handling cross-origin resource sharing
 from fastapi.middleware.cors import CORSMiddleware
-# Importing libraries from HuggingFaceTransformer for machine translational task
 from transformers import MarianMTModel, MarianTokenizer
-# Imports the logging module, which provides a flexible
-# framework for emitting log messages from Python programs.
 import logging
 
-# Created a FastAPI application instance named app
 app = FastAPI()
-
-# Configures the logging system to output log messages with
-# the DEBUG level or higher.
 logging.basicConfig(level=logging.DEBUG)
 
-# Allowing CORS for development purposes
-# Adds CORS middleware to the FastAPI application.
-# This middleware allows cross-origin requests from any origin ("*"),
-# including credentials (cookies, authorization headers), for POST requests,
-# and allows any headers to be sent
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,31 +14,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load fine-tuned models and tokenizers for each language
-models = {
-    "hi": MarianMTModel.from_pretrained("./Indian/hi"),
-    "ar":MarianMTModel.from_pretrained("./Indian/ar"),
-    "ur":MarianMTModel.from_pretrained("./Indian/ur"),
-    "tl":MarianMTModel.from_pretrained("./Indian/tl")
-}
+models = {}
+tokenizers = {}
 
-tokenizers = {
-    "hi": MarianTokenizer.from_pretrained("./Indian/hi"),
-    "ur": MarianTokenizer.from_pretrained("./Indian/ur"),
-    "ar": MarianTokenizer.from_pretrained("./Indian/ar"),
-    "tl": MarianTokenizer.from_pretrained("./Indian/tl")
-}
+languages = ["hi", "ar", "ur", "tl"]
+for lang in languages:
+    models[lang] = MarianMTModel.from_pretrained(f"./Indian/{lang}")
+    tokenizers[lang] = MarianTokenizer.from_pretrained(f"./Indian/{lang}")
 
-# Default route
 @app.get("/")
 async def root():
     return {"message": "Welcome to the translation API for Indian Languages"}
 
-# Define translation function
 def translate_text(text, language):
     model = models.get(language)
     tokenizer = tokenizers.get(language)
-    if model is None or tokenizer is None:
+    if not model or not tokenizer:
         raise HTTPException(status_code=400, detail=f"Language '{language}' not supported")
 
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
