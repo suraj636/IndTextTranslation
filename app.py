@@ -1,4 +1,3 @@
-'''
 from fastapi import FastAPI, Form, HTTPException
 from transformers import MarianMTModel, MarianTokenizer
 import logging
@@ -41,17 +40,3 @@ async def translate_text_api(text: str = Form(...), language: str = Form(...)):
     except Exception as e:
         logging.exception("Translation failed")
         raise HTTPException(status_code=500, detail="Translation failed")
-'''
-
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the greeting API"}
-
-@app.get("/greet/{name}")
-async def greet(name: str):
-    return {"message": f"Hello, {name}"}
-
