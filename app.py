@@ -1,18 +1,9 @@
 from fastapi import FastAPI, Form, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from transformers import MarianMTModel, MarianTokenizer
 import logging
 
 app = FastAPI()
 logging.basicConfig(level=logging.DEBUG)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["POST"],
-    allow_headers=["*"],
-)
 
 models = {}
 tokenizers = {}
