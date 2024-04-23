@@ -5,26 +5,18 @@ import logging
 app = FastAPI()
 logging.basicConfig(level=logging.DEBUG)
 
-models = {}
-tokenizers = {}
-
 languages = ["hi", "ar", "ur", "tl"]
 
-def load_models():
-    for lang in languages:
-        models[lang] = MarianMTModel.from_pretrained(f"./Indian/{lang}")
-        tokenizers[lang] = MarianTokenizer.from_pretrained(f"./Indian/{lang}")
-
-def lazy_load_models():
-    if not models:
-        load_models()
+def load_model(language):
+    model = MarianMTModel.from_pretrained(f"./Indian/{language}")
+    tokenizer = MarianTokenizer.from_pretrained(f"./Indian/{language}")
+    return model, tokenizer
 
 def translate_text(text, language):
-    lazy_load_models()
-    model = models.get(language)
-    tokenizer = tokenizers.get(language)
-    if not model or not tokenizer:
+    if language not in languages:
         raise HTTPException(status_code=400, detail=f"Language '{language}' not supported")
+
+    model, tokenizer = load_model(language)
 
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
     translated_ids = model.generate(**inputs)
@@ -34,8 +26,6 @@ def translate_text(text, language):
 @app.get("/")
 async def root():
     return {"message": "Welcome to the translation API for Indian Languages"}
-
-
 
 @app.post("/translate/")
 async def translate_text_api(text: str = Form(...), language: str = Form(...)):
