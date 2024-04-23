@@ -5,6 +5,10 @@ import logging
 app = FastAPI()
 logging.basicConfig(level=logging.DEBUG)
 
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the translation API for Indian Languages"}
+
 models = {}
 tokenizers = {}
 
@@ -13,9 +17,6 @@ for lang in languages:
     models[lang] = MarianMTModel.from_pretrained(f"./Indian/{lang}")
     tokenizers[lang] = MarianTokenizer.from_pretrained(f"./Indian/{lang}")
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the translation API for Indian Languages"}
 
 def translate_text(text, language):
     model = models.get(language)
